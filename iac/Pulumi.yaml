@@ -1,0 +1,3 @@
+name: aws-meetup-group-data-services-infra
+runtime: dotnet
+description: A minimal AWS C# Pulumi program
