@@ -20,6 +20,7 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
             var temperatureS3Firehose = Kinesis.CreateEnrichedDataS3Firehose($"{Common.appName}_temperature_producer_s3", temperatureEnrichedDataBucket.Arn, firehoseRole.Arn);
             var pressureS3Firehose = Kinesis.CreateEnrichedDataS3Firehose($"{Common.appName}_pressure_producer_s3", pressureEnrichedDataBucket.Arn, firehoseRole.Arn);
 
+            var inputStreamColumns = new List<string>(){ "SITE_ID", "SENSOR_TYPE", "SENSOR_READING_VALUE", "READING_TIMESTAMP" };
             var analyticsAppRole = Iam.CreateKinesisAnalyticsAppRole();
             var tempAnalyticsApp = Kinesis.CreateAnalyticsApplication($"{Common.appName}_temperature_data_analytics", new AnalyticsAppS3EnrichmentArgs (
                 tempRefDataBucket.Arn,
@@ -28,7 +29,7 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
                 temperatureS3Firehose.Arn,
                 analyticsAppRole.Arn,
                 "temperature",
-                new List<string>(){ "SITE_ID", "SENSOR_READING_VALUE" },
+                inputStreamColumns,
                 "JSON",
                 "weather.json",
                 new List<string>(){"SITE_ID", "OUTSIDE_TEMPERATURE"}
@@ -40,7 +41,7 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
                 pressureS3Firehose.Arn,
                 analyticsAppRole.Arn,
                 "pressure",
-                new List<string>(){ "SITE_ID", "SENSOR_READING_VALUE" },
+                inputStreamColumns,
                 "JSON",
                 "altitude.json",
                 new List<string>(){"SITE_ID", "ALTITUDE"}
@@ -48,22 +49,6 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
 
             var temperatureAthenaDb = Athena.CreateDatabase($"{Common.appName}_temperature_athena_db", temperatureEnrichedDataBucket.BucketName);
             var pressureAthenaDb = Athena.CreateDatabase($"{Common.appName}_pressure_athena_db", pressureEnrichedDataBucket.BucketName);
-
-            this.CertPublicKey = iotCert.PublicKey;
-            this.CertPrivateKey = iotCert.PrivateKey;
-            this.CertPem = iotCert.CertificatePem;
         }
-
-        [Output]
-        public Output<string> CertPublicKey { get; set; }
-        
-        [Output]
-        public Output<string> CertPrivateKey { get; set; }
-        
-        [Output]
-        public Output<string> CertPem { get; set; }
-
-        // [Output]
-        // public Output<string> SensorTopic{ get; set; }
     }
 }
