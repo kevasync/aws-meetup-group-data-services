@@ -28,11 +28,9 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
                 temperatureS3Firehose.Arn,
                 analyticsAppRole.Arn,
                 "temperature",
-                "JSON",
                 new List<string>(){ "SITE_ID", "SENSOR_READING_VALUE" },
                 "JSON",
                 "weather.json",
-                "JSON",
                 new List<string>(){"SITE_ID", "OUTSIDE_TEMPERATURE"}
             ));
             var pressureAnalyticsApp = Kinesis.CreateAnalyticsApplication($"{Common.appName}_pressure_data_analytics", new AnalyticsAppS3EnrichmentArgs (
@@ -42,11 +40,9 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
                 pressureS3Firehose.Arn,
                 analyticsAppRole.Arn,
                 "pressure",
-                "JSON",
                 new List<string>(){ "SITE_ID", "SENSOR_READING_VALUE" },
                 "JSON",
                 "altitude.json",
-                "JSON",
                 new List<string>(){"SITE_ID", "ALTITUDE"}
             ));
 

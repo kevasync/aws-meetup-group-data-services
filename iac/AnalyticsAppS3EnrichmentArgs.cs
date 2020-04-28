@@ -8,19 +8,17 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
 
         public AnalyticsAppS3EnrichmentArgs(Output<string> referenceBucketArn, string code, Output<string> streamArn,
                                             Output<string> outputFirehoseArn, Output<string> roleArn, string namePrefix,
-                                            string streamInputformat, List<string> streamInputColumns, string outputFormat,
-                                            string referenceFileKey, string referenceFileFormat, List<string> referenceFileColumns) {
+                                            List<string> streamInputColumns, string outputFormat,
+                                            string referenceFileKey, List<string> referenceFileColumns) {
             ReferenceBucketArn = referenceBucketArn;
             Code = code;
             StreamArn = streamArn;
             OutputFirehoseArn = outputFirehoseArn;
             RoleArn = roleArn;
             NamePrefix = namePrefix;
-            StreamInputFormat = streamInputformat;
             StreamFileColumns = streamInputColumns;
             OutputFormat = outputFormat;
             ReferenceFileKey = referenceFileKey;
-            ReferenceFileFormat = referenceFileFormat;
             ReferenceFileColumns = referenceFileColumns;
         }
 
@@ -30,11 +28,9 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
         public Output<string> OutputFirehoseArn { get; set; }
         public Output<string> RoleArn { get; set; }
         public string NamePrefix { get; set; }
-        public string StreamInputFormat { get; set; }
         public List<string> StreamFileColumns { get; set; }
         public string OutputFormat { get; set; }
         public string ReferenceFileKey { get; set; }
-        public string ReferenceFileFormat { get; set; }
         public List<string> ReferenceFileColumns { get; set; }
         
     }
