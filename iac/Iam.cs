@@ -100,6 +100,12 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
                             ""kinesis:*"" 
                         ],
                         ""Resource"": ""arn:aws:kinesis:*""
+                    },{
+                        ""Effect"": ""Allow"",
+                        ""Action"": [
+                            ""es:*"" 
+                        ],
+                        ""Resource"": ""arn:aws:es:*""
                     }]
                 }"
             });
