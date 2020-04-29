@@ -10,5 +10,5 @@ Usage example of some commonly used AWS data services:
 YouTube livestream: https://youtu.be/Nm_GWcHgsno
 
 
-![Pipeline Architectire Diagram](../imgs/arch-diagram.png "Pipeline Architecture Diagram")
+![Pipeline Architectire Diagram](https://github.com/kevasync/aws-meetup-group-data-services/blob/master/imgs/arch-diagram.png "Pipeline Architecture Diagram")
 
