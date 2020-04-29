@@ -9,7 +9,8 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
         public static Bucket CreateS3Bucket(string name) {
             return new Bucket(name.Replace("_", "-"), new BucketArgs {
                 Acl = "private",
-                Tags = Common.tags
+                Tags = Common.tags,
+                ForceDestroy = true
             });
         }
 

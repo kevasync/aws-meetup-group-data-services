@@ -10,20 +10,20 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
     static class IoT {
         public static Certificate createIoT(Output<string> streamName) {
             var topicRuleRole = Iam.CreateIotTopicRuleRole();
-            var iotThingPolicy = new Policy($"{Common.appName}_iot_sensor_producer_thing_policy", new PolicyArgs{
-                PolicyDocument = @"{
-                ""Version"": ""2012-10-17"",
-                ""Statement"": [
-                    {
-                    ""Action"": [
-                        ""iot:*""
-                    ],
-                    ""Effect"": ""Allow"",
-                    ""Resource"": ""*""
-                    }
-                ]
-                }"
-            });
+            // var iotThingPolicy = new Policy($"{Common.appName}_iot_sensor_producer_thing_policy", new PolicyArgs{
+            //     PolicyDocument = @"{
+            //     ""Version"": ""2012-10-17"",
+            //     ""Statement"": [
+            //         {
+            //         ""Action"": [
+            //             ""iot:*""
+            //         ],
+            //         ""Effect"": ""Allow"",
+            //         ""Resource"": ""*""
+            //         }
+            //     ]
+            //     }"
+            // });
             
             var iotThingType = new ThingType($"{Common.appName}_iot_sensor_producer_type");
             var iotThing = new Thing($"{Common.appName}_iot_sensor_producer", new ThingArgs { ThingTypeName = iotThingType.Name });
@@ -34,10 +34,10 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
                 Thing = iotThing.Name,
             });
             
-            var iotPolicyAttachment = new PolicyAttachment($"{Common.appName}_iot_sensor_producer_policy_attachment", new PolicyAttachmentArgs{
-                Policy = iotThingPolicy.Name,
-                Target = iotCert.Arn
-            });
+            // var iotPolicyAttachment = new PolicyAttachment($"{Common.appName}_iot_sensor_producer_policy_attachment", new PolicyAttachmentArgs{
+            //     Policy = iotThingPolicy.Name,
+            //     Target = iotCert.Arn
+            // });
             
             var iotRule = new TopicRule($"{Common.appName}_sensor_ingest_iot_rule", new TopicRuleArgs {
                 Enabled = true,

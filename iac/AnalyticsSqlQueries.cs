@@ -18,3 +18,9 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
        ";
    }
 }
+
+
+// SITE_ID string,
+// SENSOR_READING_VALUE string,
+// READING_TIMESTAMP string,
+// OUTSIDE_TEMPERATURE string 

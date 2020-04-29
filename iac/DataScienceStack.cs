@@ -8,7 +8,7 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
         {
             var sensorTopicName = "aws-meetup-group.iot.sensor-readings.incoming";
             var iotSensorIngestStream = Kinesis.CreateStream(sensorTopicName);
-            var iotCert = IoT.createIoT(iotSensorIngestStream.Name);
+            // var iotCert = IoT.createIoT(iotSensorIngestStream.Name);
             var sensorRawDataBucket = S3.CreateS3Bucket($"{Common.appName}-sensor-raw-data");
             var temperatureEnrichedDataBucket = S3.CreateS3Bucket($"{Common.appName}-temp-enriched-data");
             var pressureEnrichedDataBucket = S3.CreateS3Bucket($"{Common.appName}-pressure-enriched-data");
@@ -52,8 +52,18 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
                 new List<string>(){"SITE_ID", "ALTITUDE"}
             ));
 
-            var temperatureAthenaDb = Athena.CreateDatabase($"{Common.appName}_temperature_athena_db", temperatureEnrichedDataBucket.BucketName);
-            var pressureAthenaDb = Athena.CreateDatabase($"{Common.appName}_pressure_athena_db", pressureEnrichedDataBucket.BucketName);
+            var ahtenaResultBucket = S3.CreateS3Bucket($"{Common.appName}-athena-result");
+            var s3AthenaDb = Athena.CreateDatabase($"{Common.appName}_sensor_athena_db", ahtenaResultBucket.BucketName);
+            this.TopicName = iotSensorIngestStream.Name;
+            this.EnrichedPressureBucketName = pressureEnrichedDataBucket.BucketName;
+            this.EnrichedTemperatureBucketName = temperatureEnrichedDataBucket.BucketName;
         }
+
+        [Output]
+        public Output<string> TopicName { get; set; }
+        [Output]
+        public Output<string> EnrichedPressureBucketName { get; set; }
+        [Output]
+        public Output<string> EnrichedTemperatureBucketName { get; set; }
     }
 }
