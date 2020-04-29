@@ -67,7 +67,8 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
         public Output<string> EnrichedPressureBucketName { get; set; }
         [Output]
         public Output<string> EnrichedTemperatureBucketName { get; set; }
-
+        
+        [Output]
         public Output<string> RawSensorDataBucketName { get; set; }
         [Output]
         public Output<string> ReferenceDataBucket { get; set; }
