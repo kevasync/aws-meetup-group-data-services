@@ -8,7 +8,7 @@ Usage example of some commonly used AWS data services:
  * Athena
 
 ### Links n Such:
- * YouTube livestream: https://youtu.be/Nm_GWcHgsno
+ * Live stream: https://youtu.be/Nm_GWcHgsno
  * Slides: https://speakerdeck.com/kevasync/aws-data-pipelines-part-1
 
 ![Pipeline Architectire Diagram](https://github.com/kevasync/aws-meetup-group-data-services/blob/master/imgs/arch-diagram.png "Pipeline Architecture Diagram")
