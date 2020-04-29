@@ -1,4 +1,13 @@
-# aws-meetup-group-data-services
-Usage example of some commonly used AWS data services for AWS Meetup Group's 
+# AWS Meetup Group
+## AWS Data Pipeline - Part 1
+Usage example of some commonly used AWS data services:
+ * Kinesis Data Streams
+ * Kinesis Firehose Delivery Stream
+ * Kinesis Analytics Applications
+ * S3
+ * Athena
 
 YouTube livestream: https://youtu.be/Nm_GWcHgsno
+
+
+
