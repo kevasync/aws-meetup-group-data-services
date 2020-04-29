@@ -57,7 +57,7 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
                         RecordFormat = new AnalyticsApplicationInputsSchemaRecordFormatArgs {
                             MappingParameters = new AnalyticsApplicationInputsSchemaRecordFormatMappingParametersArgs {
                                 Json = new AnalyticsApplicationInputsSchemaRecordFormatMappingParametersJsonArgs{
-                                    RecordRowPath = ".records"
+                                    RecordRowPath = "."
                                 }
                             }
                         },
@@ -90,15 +90,16 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
                     Schema = new AnalyticsApplicationReferenceDataSourcesSchemaArgs {
                         RecordFormat = new AnalyticsApplicationReferenceDataSourcesSchemaRecordFormatArgs {
                             MappingParameters = new AnalyticsApplicationReferenceDataSourcesSchemaRecordFormatMappingParametersArgs {
-                                Json = new AnalyticsApplicationReferenceDataSourcesSchemaRecordFormatMappingParametersJsonArgs {
-                                    RecordRowPath = ".records"
+                                Csv = new AnalyticsApplicationReferenceDataSourcesSchemaRecordFormatMappingParametersCsvArgs {
+                                    RecordColumnDelimiter = ",",
+                                    RecordRowDelimiter = "\n"
                                 }
                             }
                         },
                         RecordColumns = args.ReferenceFileColumns.Select(x => new AnalyticsApplicationReferenceDataSourcesSchemaRecordColumnArgs{
                             Name = x,
                             SqlType = "VARCHAR(1024)",
-                            Mapping = $"$.{x}"
+                            Mapping = x
                         }).ToList()
                     }
                 },

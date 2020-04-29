@@ -10,10 +10,15 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
             var iotSensorIngestStream = Kinesis.CreateStream(sensorTopicName);
             var iotCert = IoT.createIoT(iotSensorIngestStream.Name);
             var sensorRawDataBucket = S3.CreateS3Bucket($"{Common.appName}-sensor-raw-data");
-            var tempRefDataBucket = S3.CreateS3Bucket($"{Common.appName}-temperature-ref-data");
-            var pressureRefDataBucket = S3.CreateS3Bucket($"{Common.appName}-pressure-ref-data");
             var temperatureEnrichedDataBucket = S3.CreateS3Bucket($"{Common.appName}-temp-enriched-data");
             var pressureEnrichedDataBucket = S3.CreateS3Bucket($"{Common.appName}-pressure-enriched-data");
+            
+            var pressureRefFileName = "altitude.csv";
+            var pressureRefDataBucket = S3.CreateS3Bucket($"{Common.appName}-pressure-ref-data");
+            
+            var temperatureRefFileName = "weather.csv";
+            var temperatureRefDataBucket = S3.CreateS3Bucket($"{Common.appName}-temperature-ref-data");
+            
 
             var firehoseRole = Iam.CreateFirehoseRole();
             var sensorS3Firehose = Kinesis.CreateRawDataS3Firehose($"{Common.appName}_sensor_producer_s3", iotSensorIngestStream.Arn, sensorRawDataBucket.Arn, firehoseRole.Arn);
@@ -23,7 +28,7 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
             var inputStreamColumns = new List<string>(){ "SITE_ID", "SENSOR_TYPE", "SENSOR_READING_VALUE", "READING_TIMESTAMP" };
             var analyticsAppRole = Iam.CreateKinesisAnalyticsAppRole();
             var tempAnalyticsApp = Kinesis.CreateAnalyticsApplication($"{Common.appName}_temperature_data_analytics", new AnalyticsAppS3EnrichmentArgs (
-                tempRefDataBucket.Arn,
+                temperatureRefDataBucket.Arn,
                 AnalyticsSqlQueries.temperatureQuery,
                 iotSensorIngestStream.Arn,
                 temperatureS3Firehose.Arn,
@@ -31,7 +36,7 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
                 "temperature",
                 inputStreamColumns,
                 "JSON",
-                "weather.json",
+                temperatureRefFileName,
                 new List<string>(){"SITE_ID", "OUTSIDE_TEMPERATURE"}
             ));
             var pressureAnalyticsApp = Kinesis.CreateAnalyticsApplication($"{Common.appName}_pressure_data_analytics", new AnalyticsAppS3EnrichmentArgs (
@@ -43,7 +48,7 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
                 "pressure",
                 inputStreamColumns,
                 "JSON",
-                "altitude.json",
+                pressureRefFileName,
                 new List<string>(){"SITE_ID", "ALTITUDE"}
             ));
 
