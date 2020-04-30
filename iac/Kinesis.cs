@@ -6,23 +6,23 @@ using System.Linq;
 
 namespace AwsMeetupGroup.DataServices.Infrastructure {
     static class Kinesis {
-        public static Stream CreateStream(string topicName) {
-            return new Stream(topicName, new StreamArgs {
+        public static Stream CreateStream(string streamName) {
+            return new Stream(streamName, new StreamArgs {
                 RetentionPeriod = 48,
                 ShardCount = 1,
                 Tags = Common.tags
             });
         }
 
-        public static FirehoseDeliveryStream CreateRawDataS3Firehose(string name, Output<string> streamArn, Output<string> bucketArn, Output<string> roleArn) {
+        public static FirehoseDeliveryStream CreateRawDataS3Firehose(string name, Output<string> inputStreamArn, Output<string> outputBucketArn, Output<string> roleArn) {
             return new FirehoseDeliveryStream(name, new FirehoseDeliveryStreamArgs{
                 KinesisSourceConfiguration = new FirehoseDeliveryStreamKinesisSourceConfigurationArgs {
-                    KinesisStreamArn = streamArn, 
+                    KinesisStreamArn = inputStreamArn, 
                     RoleArn = roleArn
                 },
                 Destination = "s3",
                 S3Configuration = new FirehoseDeliveryStreamS3ConfigurationArgs {
-                    BucketArn = bucketArn,
+                    BucketArn = outputBucketArn,
                     RoleArn = roleArn
                 },
                 Tags = Common.tags

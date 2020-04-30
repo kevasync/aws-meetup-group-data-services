@@ -54,6 +54,8 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
 
             //Create Ahtena Database (Need to manually create tables)
             var s3AthenaDb = Athena.CreateDatabase($"{Common.appName}_sensor_athena_db", ahtenaResultBucket.BucketName);
+            
+            //Set outputs
             this.StreamName = iotSensorIngestStream.Name;
             this.EnrichedPressureBucketName = pressureEnrichedDataBucket.BucketName;
             this.EnrichedTemperatureBucketName = temperatureEnrichedDataBucket.BucketName;
