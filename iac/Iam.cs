@@ -24,6 +24,7 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
                 }",
                 Tags = Common.tags
             });
+            
             var policy = new RolePolicy($"{Common.appName}-redshift-role-policy", new RolePolicyArgs
             {
                 Role = role.Id,  
@@ -34,6 +35,12 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
                         ""Effect"": ""Allow"",
                         ""Action"": [
                             ""s3:*""
+                        ],
+                        ""Resource"": ""*""
+                    },{
+                        ""Effect"": ""Allow"",
+                        ""Action"": [
+                            ""glue:*""
                         ],
                         ""Resource"": ""*""
                     }]

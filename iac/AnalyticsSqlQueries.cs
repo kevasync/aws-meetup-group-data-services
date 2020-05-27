@@ -27,10 +27,10 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
 
 
 // CREATE EXTERNAL TABLE IF NOT EXISTS awsmeetupgroup_dataservicesdemo_sensor_athena_db_0b555a3.pressure (
-//   `site_id` string,
-//   `sensor_reading_value` string,
-//   `reading_timestamp` string,
-//   `altitude` string 
+//   site_id string,
+//   sensor_reading_value string,
+//   reading_timestamp string,
+//   altitude string 
 // )
 // ROW FORMAT SERDE 'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'
 // WITH SERDEPROPERTIES (
@@ -61,19 +61,34 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
 //spectrum:
 //CREATE External schema and table
 
+// drop external schema spectrum_schema;
 
-// create external schema s3_external_schema 
-// from data catalog 
-// database 'spectrumdb' 
-// iam_role 'arn:aws:iam::<AWS_ACCOUNT_ID>:role/aod-redshift-role'
+// create external schema spectrum_schema from data catalog 
+// database 'spectrum_db' 
+// iam_role 'arn:aws:iam::<account>:role/AWSMeetupGroup_DataServicesDemo-redshift-role-3f9603a'
+// region 'us-west-2'
 // create external database if not exists;
 
 
-// CREATE  external table s3_external_schema.PRESSURE ( 
+
+// CREATE  external table spectrum_schema.pressure ( 
 //   `SITE_ID` VARCHAR(128),
 //   `SENSOR_READING_VALUE` VARCHAR(128),
 //   `READING_TIMESTAMP` VARCHAR(128),
 //   `ALTITUDE` VARCHAR(128) 
 //   )
 // stored as PARQUET
-// location 's3://awsmeetupgroup-dataservicesdemo-pressure-enriched-data-6be57cf/';
+// location 's3://awsmeetupgroup-dataservicesdemo-pressure-enriched-data-cc612db/';
+
+// https://aws.amazon.com/blogs/big-data/10-best-practices-for-amazon-redshift-spectrum/
+
+
+
+// create table public.siteinfo (
+// 	siteId varchar(128),
+// 	siteName varchar(128)
+// );
+
+// insert into public.siteinfo values ('5', 'Charleston');
+
+// select * from  spectrum_schema.pressure p left join public.siteinfo i on p.site_id = i.siteId;

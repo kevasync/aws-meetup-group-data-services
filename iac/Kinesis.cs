@@ -72,7 +72,7 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
                 Destination = "redshift",
                 RedshiftConfiguration = new FirehoseDeliveryStreamRedshiftConfigurationArgs() {
                     //https://github.com/pulumi/pulumi/issues/1631
-                    ClusterJdbcurl = "jdbc:redshift://awsmeetupgroup-dataservicesdemo-redshift-1.chsus2aajypt.us-west-2.redshift.amazonaws.com:5439/default_db",
+                    ClusterJdbcurl = "jdbc:redshift://awsmeetupgroup-dataservicesdemo-redshift-1.cilhes4fcm24.us-west-2.redshift.amazonaws.com:5439/default_db",
                     RoleArn = roleArn,
                     DataTableName = tableName,
                     DataTableColumns = columns,
