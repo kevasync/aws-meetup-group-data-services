@@ -1,6 +1,6 @@
 # AWS Meetup Group
 
-## AWS Data Pipeline - Part 1
+## AWS Data Pipeline - Part 2
 Usage example of some more commonly used AWS data services:
  * Glue
  * Redshift
