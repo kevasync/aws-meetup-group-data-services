@@ -5,6 +5,46 @@ using Pulumi.Aws.Iot;
 namespace AwsMeetupGroup.DataServices.Infrastructure {
     static class Iam {
         
+        public static Role CreateRedshiftRole() {
+            var role = new Role($"{Common.appName}-redshift-role", new RoleArgs
+            {
+                AssumeRolePolicy =
+                    @"{
+                    ""Version"": ""2012-10-17"",
+                    ""Statement"": [
+                        {
+                            ""Action"": ""sts:AssumeRole"",
+                            ""Principal"": {
+                                ""Service"": ""redshift.amazonaws.com""
+                            },
+                            ""Effect"": ""Allow"",
+                            ""Sid"": """"
+                        }
+                    ]
+                }",
+                Tags = Common.tags
+            });
+            var policy = new RolePolicy($"{Common.appName}-redshift-role-policy", new RolePolicyArgs
+            {
+                Role = role.Id,  
+                Policy =
+                    @"{
+                    ""Version"": ""2012-10-17"",
+                    ""Statement"": [{
+                        ""Effect"": ""Allow"",
+                        ""Action"": [
+                            ""s3:*""
+                        ],
+                        ""Resource"": ""*""
+                    }]
+                }"
+            });
+
+            return role;
+        }
+
+         
+
         public static Role CreateKinesisAnalyticsAppRole() {
             
             var role = new Role($"{Common.appName}-analytics-app-role", new RoleArgs
@@ -61,7 +101,6 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
 
             return role;
         }
-
          public static Role CreateFirehoseRole() {
             
             var role = new Role($"{Common.appName}-firehose-role", new RoleArgs
@@ -106,6 +145,18 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
                             ""es:*"" 
                         ],
                         ""Resource"": ""arn:aws:es:*""
+                    },{
+                        ""Effect"": ""Allow"",
+                        ""Action"": [
+                            ""redshift:*"" 
+                        ],
+                        ""Resource"": ""arn:aws:redshift:*""
+                    },{
+                        ""Effect"": ""Allow"",
+                        ""Action"": [
+                            ""glue:*"" 
+                        ],
+                        ""Resource"": ""*""
                     }]
                 }"
             });

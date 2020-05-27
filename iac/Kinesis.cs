@@ -29,16 +29,83 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
             });
         }
 
-        public static FirehoseDeliveryStream CreateEnrichedDataS3Firehose(string name, Output<string> bucketArn, Output<string> roleArn) {
+        public static FirehoseDeliveryStream CreateEnrichedDataS3Firehose(string name, Output<string> inputStreamArn, Output<string> bucketArn, Output<string> roleArn, Output<string> glueDbName, Output<string> glueSchemaTableName) {
             return new FirehoseDeliveryStream(name, new FirehoseDeliveryStreamArgs {
-                Destination = "s3",
-                S3Configuration = new FirehoseDeliveryStreamS3ConfigurationArgs {
-                    BucketArn = bucketArn,
+                KinesisSourceConfiguration = new FirehoseDeliveryStreamKinesisSourceConfigurationArgs {
+                    KinesisStreamArn = inputStreamArn, 
                     RoleArn = roleArn
+                },
+                Destination = "extended_s3",
+                ExtendedS3Configuration = new FirehoseDeliveryStreamExtendedS3ConfigurationArgs () {
+                    BucketArn = bucketArn,
+                    RoleArn = roleArn,
+                    BufferSize = 128,
+                    DataFormatConversionConfiguration = new FirehoseDeliveryStreamExtendedS3ConfigurationDataFormatConversionConfigurationArgs {
+                        InputFormatConfiguration = new FirehoseDeliveryStreamExtendedS3ConfigurationDataFormatConversionConfigurationInputFormatConfigurationArgs {
+                            Deserializer = new FirehoseDeliveryStreamExtendedS3ConfigurationDataFormatConversionConfigurationInputFormatConfigurationDeserializerArgs {
+                                HiveJsonSerDe = new FirehoseDeliveryStreamExtendedS3ConfigurationDataFormatConversionConfigurationInputFormatConfigurationDeserializerHiveJsonSerDeArgs {}
+                            }
+                        },
+                        OutputFormatConfiguration = new FirehoseDeliveryStreamExtendedS3ConfigurationDataFormatConversionConfigurationOutputFormatConfigurationArgs {
+                            Serializer = new FirehoseDeliveryStreamExtendedS3ConfigurationDataFormatConversionConfigurationOutputFormatConfigurationSerializerArgs {
+                                ParquetSerDe = new FirehoseDeliveryStreamExtendedS3ConfigurationDataFormatConversionConfigurationOutputFormatConfigurationSerializerParquetSerDeArgs { }
+                            }
+                        },
+                        SchemaConfiguration = new FirehoseDeliveryStreamExtendedS3ConfigurationDataFormatConversionConfigurationSchemaConfigurationArgs {
+                            DatabaseName = glueDbName,
+                            TableName = glueSchemaTableName,
+                            RoleArn = roleArn
+                        }
+                    },
                 },
                 Tags = Common.tags
             });
         }
+
+        public static FirehoseDeliveryStream CreateEnrichedDataRedshiftFirehose(string name, Output<string> endpoint, Output<int?> port, Output<string> database, Output<string?> username, Output<string?> password, Output<string> roleArn, string tableName, string columns, Output<string> inputStreamArn, Output<string> tempBucketArn) {
+            
+            return new FirehoseDeliveryStream(name, new FirehoseDeliveryStreamArgs {
+                KinesisSourceConfiguration = new FirehoseDeliveryStreamKinesisSourceConfigurationArgs {
+                    KinesisStreamArn = inputStreamArn, 
+                    RoleArn = roleArn
+                },
+                Destination = "redshift",
+                RedshiftConfiguration = new FirehoseDeliveryStreamRedshiftConfigurationArgs() {
+                    //https://github.com/pulumi/pulumi/issues/1631
+                    ClusterJdbcurl = "jdbc:redshift://awsmeetupgroup-dataservicesdemo-redshift-1.chsus2aajypt.us-west-2.redshift.amazonaws.com:5439/default_db",
+                    RoleArn = roleArn,
+                    DataTableName = tableName,
+                    DataTableColumns = columns,
+                    Username = username,
+                    Password = password
+                },
+                S3Configuration = new FirehoseDeliveryStreamS3ConfigurationArgs() { 
+                    BucketArn = tempBucketArn, RoleArn = roleArn 
+                },
+                Tags = Common.tags
+            });
+        }
+
+          public static FirehoseDeliveryStream CreateEnrichedDataElasticSearchFirehose(string name, Output<string> domainArn, Output<string> roleArn, string indexName, Output<string> inputStreamArn, Output<string> tempBucketArn) {
+            return new FirehoseDeliveryStream(name, new FirehoseDeliveryStreamArgs {
+                KinesisSourceConfiguration = new FirehoseDeliveryStreamKinesisSourceConfigurationArgs {
+                    KinesisStreamArn = inputStreamArn, 
+                    RoleArn = roleArn
+                },
+                Destination = "elasticsearch",
+                ElasticsearchConfiguration = new FirehoseDeliveryStreamElasticsearchConfigurationArgs() {
+                    RoleArn = roleArn,
+                    DomainArn = domainArn,
+                    IndexName = indexName,
+                    TypeName = indexName
+                },
+                S3Configuration = new FirehoseDeliveryStreamS3ConfigurationArgs() {
+                    BucketArn = tempBucketArn, RoleArn = roleArn
+                },
+                Tags = Common.tags
+            });
+        }
+
 
         public static AnalyticsApplication CreateAnalyticsApplication(string name, AnalyticsAppS3EnrichmentArgs args) {
             return new AnalyticsApplication(name, new AnalyticsApplicationArgs {
@@ -71,8 +138,8 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
                 Outputs = new List<AnalyticsApplicationOutputArgs>(){
                     new AnalyticsApplicationOutputArgs {
                         Name = $"{args.NamePrefix.ToUpper()}_ANALYTICS_TOPIC",
-                        KinesisFirehose = new AnalyticsApplicationOutputKinesisFirehoseArgs {
-                            ResourceArn = args.OutputFirehoseArn,
+                        KinesisStream = new AnalyticsApplicationOutputKinesisStreamArgs() {
+                            ResourceArn = args.OutputArn,
                             RoleArn = args.RoleArn
                         },
                         Schema = new AnalyticsApplicationOutputSchemaArgs {

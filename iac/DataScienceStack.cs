@@ -12,17 +12,45 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
             var temperatureEnrichedDataBucket = S3.CreateS3Bucket($"{Common.appName}-temp-enriched-data");
             var pressureEnrichedDataBucket = S3.CreateS3Bucket($"{Common.appName}-pressure-enriched-data");
             var ahtenaResultBucket = S3.CreateS3Bucket($"{Common.appName}-athena-result");
+            var firehoseTempBucket = S3.CreateS3Bucket($"{Common.appName}-firehose-temp");
+            
+            //Create Glue Schemas
+            var glueDbName = $"{Common.appName}_glue_schema_database";
+            var glueDb = Glue.CreateGlueDatabase(glueDbName);
+            var temperatureGlueSchemaTable = Glue.CreateGlueTable(glueDb.Name, $"{Common.appName}_glue_temperature_table",
+                new List<string> {"SITE_ID", "SENSOR_READING_VALUE", "READING_TIMESTAMP", "OUTSIDE_TEMPERATURE"});
+            var pressureGlueSchemaTable = Glue.CreateGlueTable(glueDb.Name, $"{Common.appName}_glue_pressure_table",
+                new List<string> {"SITE_ID", "SENSOR_READING_VALUE", "READING_TIMESTAMP", "ALTITUDE"});
+            
+            //Create Redshift 
+            var subnet = Networking.CreateSubnet();
+            var securityGroup = Networking.CreateSecurityGroup(subnet.VpcId);
+            var redshiftRole = Iam.CreateRedshiftRole();
+            var redshiftCluster = Redshift.CreateRedshiftCluster("default_db", redshiftRole.Arn, new InputList<string> {subnet.Id}, securityGroup.Id);
 
-            //Create Incoming Kinesis Data Strean
+            //Create ElasticSearch
+            var elasticSearchDomain = ElasticSearch.CreateSearchDomain("meetup-search-domain");
+
+            //Create Kinesis Data Streams
             var sensorTopicName = "aws-meetup-group.iot.sensor-readings.incoming";
             var iotSensorIngestStream = Kinesis.CreateStream(sensorTopicName);
-            
-            
+            var enrichedTemperatureTopicName = "aws-meetup-group.temperature.enriched";
+            var enrichedTemperatureStream = Kinesis.CreateStream(enrichedTemperatureTopicName);
+            var enrichedPressureTopicName = "aws-meetup-group.pressure.enirched";
+            var enrichedPressureStream = Kinesis.CreateStream(enrichedPressureTopicName);
+                        
             //Create Firehose Delivery Streams
             var firehoseRole = Iam.CreateFirehoseRole();
+            
             var sensorS3Firehose = Kinesis.CreateRawDataS3Firehose($"{Common.appName}_sensor_producer_s3", iotSensorIngestStream.Arn, sensorRawDataBucket.Arn, firehoseRole.Arn);
-            var temperatureS3Firehose = Kinesis.CreateEnrichedDataS3Firehose($"{Common.appName}_temperature_producer_s3", temperatureEnrichedDataBucket.Arn, firehoseRole.Arn);
-            var pressureS3Firehose = Kinesis.CreateEnrichedDataS3Firehose($"{Common.appName}_pressure_producer_s3", pressureEnrichedDataBucket.Arn, firehoseRole.Arn);
+            
+            var temperatureS3Firehose = Kinesis.CreateEnrichedDataS3Firehose($"{Common.appName}_temperature_producer_s3", enrichedTemperatureStream.Arn, temperatureEnrichedDataBucket.Arn, firehoseRole.Arn, glueDb.Name, temperatureGlueSchemaTable.Name);
+            var temperatureElasticSearchFirehose = Kinesis.CreateEnrichedDataElasticSearchFirehose($"{Common.appName}_temperature_producer_es", elasticSearchDomain.Arn, firehoseRole.Arn, "temperature", enrichedTemperatureStream.Arn, firehoseTempBucket.Arn);
+            var temperatureRedshiftFirehose = Kinesis.CreateEnrichedDataRedshiftFirehose($"{Common.appName}_temperature_producer_rs", redshiftCluster.Endpoint, redshiftCluster.Port, redshiftCluster.DatabaseName, redshiftCluster.MasterUsername, redshiftCluster.MasterPassword, firehoseRole.Arn, "TEMPERATURE", "SITE_ID,SENSOR_READING_VALUE,READING_TIMESTAMP,OUTSIDE_TEMPERATURE", enrichedTemperatureStream.Arn, firehoseTempBucket.Arn);
+            
+            var pressureS3Firehose = Kinesis.CreateEnrichedDataS3Firehose($"{Common.appName}_pressure_producer_s3", enrichedPressureStream.Arn, pressureEnrichedDataBucket.Arn, firehoseRole.Arn, glueDb.Name, pressureGlueSchemaTable.Name);
+            var pressureRedshiftFirehose = Kinesis.CreateEnrichedDataRedshiftFirehose($"{Common.appName}_pressure_producer_rs", redshiftCluster.Endpoint, redshiftCluster.Port, redshiftCluster.DatabaseName, redshiftCluster.MasterUsername, redshiftCluster.MasterPassword, firehoseRole.Arn, "PRESSURE", "SITE_ID,SENSOR_READING_VALUE,READING_TIMESTAMP,ALTITUDE", enrichedPressureStream.Arn, firehoseTempBucket.Arn);
+            var pressureElasticSearchFirehose = Kinesis.CreateEnrichedDataElasticSearchFirehose($"{Common.appName}_pressure_producer_es", elasticSearchDomain.Arn, firehoseRole.Arn, "pressure", enrichedPressureStream.Arn, firehoseTempBucket.Arn);
 
             //Create Kinesis Analytics Apps
             var inputStreamColumns = new List<string>(){ "SITE_ID", "SENSOR_TYPE", "SENSOR_READING_VALUE", "READING_TIMESTAMP" };
@@ -31,7 +59,7 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
                 sensorRefDataBucket.Arn,
                 AnalyticsSqlQueries.temperatureQuery,
                 iotSensorIngestStream.Arn,
-                temperatureS3Firehose.Arn,
+                enrichedTemperatureStream.Arn,
                 analyticsAppRole.Arn,
                 "temperature",
                 inputStreamColumns,
@@ -43,7 +71,7 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
                 sensorRefDataBucket.Arn,
                 AnalyticsSqlQueries.pressureQuery,
                 iotSensorIngestStream.Arn,
-                pressureS3Firehose.Arn,
+                enrichedPressureStream.Arn,
                 analyticsAppRole.Arn,
                 "pressure",
                 inputStreamColumns,
@@ -61,6 +89,8 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
             this.EnrichedTemperatureBucketName = temperatureEnrichedDataBucket.BucketName;
             this.RawSensorDataBucketName = sensorRawDataBucket.BucketName;
             this.ReferenceDataBucket = sensorRefDataBucket.BucketName;
+            this.RedshiftEndpoint = redshiftCluster.Endpoint;
+            this.RedshiftRoleArn = redshiftRole.Arn;
         }
 
         [Output]
@@ -69,10 +99,13 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
         public Output<string> EnrichedPressureBucketName { get; set; }
         [Output]
         public Output<string> EnrichedTemperatureBucketName { get; set; }
-        
         [Output]
         public Output<string> RawSensorDataBucketName { get; set; }
         [Output]
         public Output<string> ReferenceDataBucket { get; set; }
+        [Output]
+        public Output<string> RedshiftEndpoint { get; set; }
+        [Output]
+        public Output<string> RedshiftRoleArn { get; set; }
     }
 }

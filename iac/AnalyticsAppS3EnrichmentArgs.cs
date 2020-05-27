@@ -13,7 +13,7 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
             ReferenceBucketArn = referenceBucketArn;
             Code = code;
             StreamArn = streamArn;
-            OutputFirehoseArn = outputFirehoseArn;
+            OutputArn = outputFirehoseArn;
             RoleArn = roleArn;
             NamePrefix = namePrefix;
             StreamFileColumns = streamInputColumns;
@@ -25,7 +25,7 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
         public Output<string> ReferenceBucketArn { get; set; }
         public string Code { get; set; }
         public Output<string> StreamArn { get; set; }
-        public Output<string> OutputFirehoseArn { get; set; }
+        public Output<string> OutputArn { get; set; }
         public Output<string> RoleArn { get; set; }
         public string NamePrefix { get; set; }
         public List<string> StreamFileColumns { get; set; }
