@@ -1,6 +1,7 @@
 using Pulumi;
 using Pulumi.Aws.Iam;
 using Pulumi.Aws.Iot;
+
 using Policy = Pulumi.Aws.Iot.Policy;
 using PolicyArgs = Pulumi.Aws.Iot.PolicyArgs;
 using PolicyAttachment = Pulumi.Aws.Iot.PolicyAttachment;
@@ -8,16 +9,19 @@ using PolicyAttachmentArgs = Pulumi.Aws.Iot.PolicyAttachmentArgs;
 
 namespace AwsMeetupGroup.DataServices.Infrastructure {
     static class IoT {
-        // public static Certificate createIoT(Output<string> streamName) {
-        public static Certificate createIoT() {
+        // public static Certificate createGreengrassCore(Output<string> streamName) { 
+
+        // }
+        public static Certificate createIoTCore(Output<string> streamName) {
             var topicRuleRole = Iam.CreateIotTopicRuleRole();
-            var iotThingPolicy = new Policy($"{Common.appName}_iot_sensor_producer_thing_policy", new PolicyArgs{
+            var iotThingPolicy = new Policy($"{Common.appName}_iot_sensor_producer_thing_policy", new PolicyArgs{ 
                 PolicyDocument = @"{
                 ""Version"": ""2012-10-17"",
                 ""Statement"": [
                     {
                     ""Action"": [
-                        ""iot:*""
+                        ""iot:*"", 
+                        ""kinesis:*""
                     ],
                     ""Effect"": ""Allow"",
                     ""Resource"": ""*""
@@ -40,16 +44,16 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
                 Target = iotCert.Arn
             });
             
-            // var iotRule = new TopicRule($"{Common.appName}_sensor_ingest_iot_rule", new TopicRuleArgs {
-            //     Enabled = true,
-            //     Kinesis = new Pulumi.Aws.Iot.Inputs.TopicRuleKinesisArgs {
-            //         PartitionKey = "'id'",
-            //         RoleArn = topicRuleRole.Arn,
-            //         StreamName = streamName
-            //     },
-            //     Sql = $"SELECT * FROM 'topic/{Common.appName}-sensor-ingest-topic'",
-            //     SqlVersion = "2015-10-08"
-            // });
+            var iotRule = new TopicRule($"{Common.appName}_sensor_ingest_iot_rule", new TopicRuleArgs {
+                Enabled = true,
+                Kinesis = new Pulumi.Aws.Iot.Inputs.TopicRuleKinesisArgs {
+                    PartitionKey = "'SITE_ID'",
+                    RoleArn = topicRuleRole.Arn,
+                    StreamName = streamName
+                },
+                Sql = $"SELECT * FROM 'iot/sensor-topic'",
+                SqlVersion = "2015-10-08"
+            });
 
             return iotCert;
         }

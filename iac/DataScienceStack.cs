@@ -85,7 +85,7 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
             var s3AthenaDb = Athena.CreateDatabase($"{Common.appName}_sensor_athena_db", ahtenaResultBucket.BucketName);
 
             //Create IoT Core things
-            var iotCert = IoT.createIoT();
+            var iotCert = IoT.createIoTCore(iotSensorIngestStream.Name);
             
             //Set outputs
             this.StreamName = iotSensorIngestStream.Name;
@@ -110,10 +110,10 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
         public Output<string> RawSensorDataBucketName { get; set; }
         [Output]
         public Output<string> ReferenceDataBucket { get; set; }
-        [Output]
-        public Output<string> RedshiftEndpoint { get; set; }
-        [Output]
-        public Output<string> RedshiftRoleArn { get; set; }
+        // [Output]
+        // public Output<string> RedshiftEndpoint { get; set; }
+        // [Output]
+        // public Output<string> RedshiftRoleArn { get; set; }
 
         [Output]
         public Output<string> IoTDevicePem { get; set; }

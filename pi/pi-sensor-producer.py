@@ -5,7 +5,7 @@ import argparse
 import json
 import calendar
 import sys
-
+import random
 if (len(sys.argv) != 2):
     print('Provide shadow interaction endpoint url as only argument')
     quit()
@@ -19,7 +19,7 @@ topic = "sensor-topic"
 myAWSIoTMQTTClient = None
 myAWSIoTMQTTClient = AWSIoTMQTTClient("sensor-site-%s" % clientId)
 myAWSIoTMQTTClient.configureEndpoint(host, 8883)
-myAWSIoTMQTTClient.configureCredentials("{}AmazonRootCA1.pem".format(certPath), "{}private.pem.key".format(certPath), "{}device.pem.crt".format(certPath))
+myAWSIoTMQTTClient.configureCredentials("{}AmazonRootCA1.pem".format(certPath), "{}private.pem".format(certPath), "{}device.pem.crt".format(certPath))
 
 
 # AWSIoTMQTTClient connection configuration
@@ -35,7 +35,7 @@ loopCount = 0
 while loopCount < 10:
     message = {}
     message['SITE_ID'] = clientId
-    message['SENSOR_TYPE'] = "temperature"
+    message['SENSOR_TYPE'] = "TEMPERATURE"
     message['SENSOR_READING_VALUE'] = str(random.uniform(50.0,212.0))
     message['READING_TIMESTAMP'] = calendar.timegm(time.gmtime())
     messageJson = json.dumps(message)
