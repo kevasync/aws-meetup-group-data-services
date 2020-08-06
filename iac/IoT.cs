@@ -9,19 +9,16 @@ using PolicyAttachmentArgs = Pulumi.Aws.Iot.PolicyAttachmentArgs;
 
 namespace AwsMeetupGroup.DataServices.Infrastructure {
     static class IoT {
-        // public static Certificate createGreengrassCore(Output<string> streamName) { 
-
-        // }
         public static Certificate createIoTCore(Output<string> streamName) {
             var topicRuleRole = Iam.CreateIotTopicRuleRole();
-            var iotThingPolicy = new Policy($"{Common.appName}_iot_sensor_producer_thing_policy", new PolicyArgs{ 
+            var iotThingPolicy = new Policy($"{Common.appName}_iot_sensor_producer_thing_policy", new PolicyArgs { 
                 PolicyDocument = @"{
                 ""Version"": ""2012-10-17"",
                 ""Statement"": [
                     {
                     ""Action"": [
                         ""iot:*"", 
-                        ""kinesis:*""
+                        ""  :*""
                     ],
                     ""Effect"": ""Allow"",
                     ""Resource"": ""*""
@@ -51,7 +48,7 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
                     RoleArn = topicRuleRole.Arn,
                     StreamName = streamName
                 },
-                Sql = $"SELECT * FROM 'iot/sensor-topic'",
+                Sql = $"SELECT * FROM 'sensor-topic'",
                 SqlVersion = "2015-10-08"
             });
 
