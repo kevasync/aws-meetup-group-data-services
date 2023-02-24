@@ -5,6 +5,5 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
     class Program
     {
         static Task<int> Main() => Deployment.RunAsync<DataScienceStack>();
-  
     }
 }

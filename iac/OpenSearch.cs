@@ -1,15 +1,14 @@
-using Pulumi.Aws.ElasticSearch;
-using Pulumi.Aws.ElasticSearch.Inputs;
+using Pulumi.Aws.OpenSearch;
+using Pulumi.Aws.OpenSearch.Inputs;
 
 namespace AwsMeetupGroup.DataServices.Infrastructure {
-    static class ElasticSearch{
+    static class OpenSearch{
         public static Domain CreateSearchDomain(string domainName) {
             return new Domain($"{Common.appName}-{domainName}", new DomainArgs() {
                 DomainName = domainName,
                 ClusterConfig = new DomainClusterConfigArgs() {
-                    InstanceType = "r4.large.elasticsearch"
+                    InstanceType = "t3.small.search"
                 },
-                ElasticsearchVersion = "1.5",
                 EbsOptions = new DomainEbsOptionsArgs() {
                     EbsEnabled = true,
                     VolumeSize = 100

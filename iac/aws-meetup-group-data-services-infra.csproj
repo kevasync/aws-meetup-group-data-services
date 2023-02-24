@@ -5,6 +5,6 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Pulumi.Aws" Version="2.1.0"/>
+    <PackageReference Include="Pulumi.Aws" Version="5.30.0" />
   </ItemGroup>
 </Project>

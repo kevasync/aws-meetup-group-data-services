@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using Pulumi;
 using Pulumi.Aws.Ec2;
 using Pulumi.Aws.Ec2.Inputs;
@@ -30,15 +32,13 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
                 VpcId = vpcId
             });
         }
-        public static Subnet CreateSubnet() {
+        public static List<Subnet> CreateSubnets() {
             var vpc =  new Vpc($"{Common.appName}-vpc", new VpcArgs() {
                 EnableDnsHostnames = true, 
                 EnableDnsSupport = true,
                 CidrBlock = $"{vpcCidrBase}.0/24",
                 Tags = Common.tags
             }); 
-
-            
 
             var ig = new InternetGateway($"{Common.appName}-igw", new InternetGatewayArgs() {
                 VpcId = vpc.Id,
@@ -50,16 +50,27 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
                 Tags = Common.tags
             });
             
-            var subnet =  new Subnet ($"{Common.appName}-subnet", new SubnetArgs{
-                VpcId = vpc.Id,
-                CidrBlock = $"{vpcCidrBase}.0/25",
-                Tags = Common.tags
-            });
+            var subnetCIDRRanges = new List<string>() {$"{vpcCidrBase}.0/26", $"{vpcCidrBase}.64/26", $"{vpcCidrBase}.128/26"};
+            var availabilityZones = new List<string>() { "a", "b", "c" };
+            
+            var awsConfig = new Pulumi.Config("aws");
+            var awsRegion = awsConfig.Require("region");
 
-            var rta = new RouteTableAssociation($"{Common.appName}-rta", new RouteTableAssociationArgs() {
-                RouteTableId = rt.Id,
-                SubnetId = subnet.Id,
-            });
+            var subnets = subnetCIDRRanges.Select((cidr, idx) => {
+                var subnet = new Subnet ($"{Common.appName}-subnet-{idx}", new SubnetArgs{
+                    VpcId = vpc.Id,
+                    CidrBlock = cidr,
+                    AvailabilityZone = $"{awsRegion}{availabilityZones[idx]}",
+                    Tags = Common.tags
+                });
+
+                new RouteTableAssociation($"{Common.appName}-rta-{idx}", new RouteTableAssociationArgs() {
+                    RouteTableId = rt.Id,
+                    SubnetId = subnet.Id,
+                });
+                
+                return subnet;
+            }).ToList();
 
             var drt = new DefaultRouteTable($"{Common.appName}-drt", new DefaultRouteTableArgs() {
                 DefaultRouteTableId = rt.Id,
@@ -69,7 +80,7 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
                 Tags = Common.tags
             });
             
-            return subnet;
+            return subnets;
         }
     }
 }

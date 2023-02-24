@@ -15,6 +15,8 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
         }
 
         public static FirehoseDeliveryStream CreateRawDataS3Firehose(string name, Output<string> inputStreamArn, Output<string> outputBucketArn, Output<string> roleArn) {
+            
+            
             return new FirehoseDeliveryStream(name, new FirehoseDeliveryStreamArgs{
                 KinesisSourceConfiguration = new FirehoseDeliveryStreamKinesisSourceConfigurationArgs {
                     KinesisStreamArn = inputStreamArn, 
@@ -86,7 +88,7 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
             });
         }
 
-          public static FirehoseDeliveryStream CreateEnrichedDataElasticSearchFirehose(string name, Output<string> domainArn, Output<string> roleArn, string indexName, Output<string> inputStreamArn, Output<string> tempBucketArn) {
+          public static FirehoseDeliveryStream CreateEnrichedDataOpenSearchFirehose(string name, Output<string> domainArn, Output<string> roleArn, string indexName, Output<string> inputStreamArn, Output<string> tempBucketArn) {
             return new FirehoseDeliveryStream(name, new FirehoseDeliveryStreamArgs {
                 KinesisSourceConfiguration = new FirehoseDeliveryStreamKinesisSourceConfigurationArgs {
                     KinesisStreamArn = inputStreamArn, 
@@ -96,8 +98,7 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
                 ElasticsearchConfiguration = new FirehoseDeliveryStreamElasticsearchConfigurationArgs() {
                     RoleArn = roleArn,
                     DomainArn = domainArn,
-                    IndexName = indexName,
-                    TypeName = indexName
+                    IndexName = indexName
                 },
                 S3Configuration = new FirehoseDeliveryStreamS3ConfigurationArgs() {
                     BucketArn = tempBucketArn, RoleArn = roleArn

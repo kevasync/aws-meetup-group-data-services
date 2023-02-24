@@ -7,7 +7,6 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
             return new Database(name.ToLower(), new DatabaseArgs{
                 Bucket = bucketName,
                 ForceDestroy = true
-
             });
         }
     }

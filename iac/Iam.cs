@@ -30,21 +30,41 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
                 Role = role.Id,  
                 Policy =
                     @"{
-                    ""Version"": ""2012-10-17"",
-                    ""Statement"": [{
-                        ""Effect"": ""Allow"",
-                        ""Action"": [
-                            ""s3:*""
-                        ],
-                        ""Resource"": ""*""
-                    },{
-                        ""Effect"": ""Allow"",
-                        ""Action"": [
-                            ""glue:*""
-                        ],
-                        ""Resource"": ""*""
-                    }]
-                }"
+                        ""Version"": ""2012-10-17"",
+                        ""Statement"": [
+                            {
+                                ""Effect"": ""Allow"",
+                                ""Action"": [
+                                    ""s3:*""
+                                ],
+                                ""Resource"": ""*""
+                            },{
+                                ""Effect"": ""Allow"",
+                                ""Action"": [
+                                    ""glue:*""
+                                ],
+                                ""Resource"": ""*""
+                            },
+                            {
+                                ""Effect"": ""Allow"",
+                                ""Action"": [
+                                    ""kinesis:DescribeStreamSummary"",
+                                    ""kinesis:GetShardIterator"",
+                                    ""kinesis:GetRecords"",
+                                    ""kinesis:DescribeStream""
+                                ],
+                                ""Resource"": ""arn:aws:kinesis:*:*:stream/*""
+                            },
+                            {
+                                ""Effect"": ""Allow"",
+                                ""Action"": [
+                                    ""kinesis:ListStreams"",
+                                    ""kinesis:ListShards""
+                                ],
+                                ""Resource"": ""*""
+                            }
+                        ]
+                    }"
             });
 
             return role;
