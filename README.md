@@ -11,7 +11,7 @@ Usage example of some more commonly used AWS data services:
  * Live stream: https://youtu.be/r9xcVWTNV6c
  * Slides: https://speakerdeck.com/kevasync/aws-data-pipeline-part-2
 
-![Pipeline Architectire Diagram](https://github.com/kevasync/aws-meetup-group-data-services/blob/master/imgs/arch-diagram-part2.png "Part 2 Pipeline Architecture Diagram")
+![Pipeline Architecture Diagram](https://github.com/kevasync/aws-meetup-group-data-services/blob/master/imgs/arch-diagram-part2.png "Part 2 Pipeline Architecture Diagram")
 
 
 ## AWS Data Pipeline - Part 1
@@ -31,11 +31,13 @@ Usage example of some commonly used AWS data services:
 
 ## Getting Started
 Prerequisites:
- * Active AWS account w/ [CLI access configured](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html)
+ * Active AWS account w/ [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) and [CLI access configured](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html)
  * [jq](https://stedolan.github.io/jq/download/)
+ * [python3](https://realpython.com/installing-python/) 
  * Active Pulumi account (Can be created using GitHub as login provider)
  * [Pulumi CLI](https://www.pulumi.com/docs/get-started/install/)
  * [.NET Core](https://dotnet.microsoft.com/en-us/download/dotnet/3.1)
+    * _Note:_ installation via installation binaries may conflict with package managers (e.g. Homebrew), if having issue try uninstalling from package manager and re-installing via installation binary
     * If having issues on Mac, try `dotnet-install.sh` script outlined [here](https://danielhilton.medium.com/how-to-install-multiple-asp-net-core-runtimes-in-macos-717e8d0176ea)
 
 Install Pulumi and deploy:
@@ -181,5 +183,35 @@ Setup Athena
    # aws athena get-query-results --query-execution-id <your_QueryExecutionId>
    ```
 
-Produce Data to Raw Sensor Data Topic
+Produce Data to Raw Sensor Data Topic:
+
+Let's send some data through the data pipeline and take a look at it action:
+* While still in the [iac](./iac/) directory, set the incoming data topic name:
+   ```bash
+   export INCOMING_STREAM_NAME=$(pulumi stack output --json | jq -r .IncomingStreamName)
+   echo "Incoming topic name: ${INCOMING_STREAM_NAME}"
+   ```
+* Change to the producer directory, set the region, install dependencies, run the [producer](./kinesis-producer/produce.py) for a few seconds:
+   ```bash
+   cd ../kinesis-producer
+   export REGION="us-west-2"
+   pip3 install -r requirements.txt
+   python3 produce.py
+   ```
+* 100 messages will be produced to the incoming steam"
+   ```bash
+   $ python3 produce.py
+   Produced record 0 on shard shardId-000000000000: {"SITE_ID":"8","SENSOR_TYPE":"TEMPERATURE","SENSOR_READING_VALUE":"133.85614595369273","READING_TIMESTAMP":"03/03/2023 16:00:01"}
+   Produced record 1 on shard shardId-000000000000: {"SITE_ID":"5","SENSOR_TYPE":"PRESSURE","SENSOR_READING_VALUE":"131.84987987949546","READING_TIMESTAMP":"03/03/2023 16:00:01"}
+   Produced record 2 on shard shardId-000000000000: {"SITE_ID":"9","SENSOR_TYPE":"TEMPERATURE","SENSOR_READING_VALUE":"191.12123844044754","READING_TIMESTAMP":"03/03/2023 16:00:01"}
+   Produced record 3 on shard shardId-000000000000: {"SITE_ID":"11","SENSOR_TYPE":"PRESSURE","SENSOR_READING_VALUE":"203.0377145771329","READING_TIMESTAMP":"03/03/2023 16:00:01"}
+   Produced record 4 on shard shardId-000000000000: {"SITE_ID":"7","SENSOR_TYPE":"TEMPERATURE","SENSOR_READING_VALUE":"155.52617270808798","READING_TIMESTAMP":"03/03/2023 16:00:01"}
+   Produced record 5 on shard shardId-000000000000: {"SITE_ID":"5","SENSOR_TYPE":"PRESSURE","SENSOR_READING_VALUE":"121.79389050717671","READING_TIMESTAMP":"03/03/2023 16:00:01"}
+   Produced record 6 on shard shardId-000000000000: {"SITE_ID":"3","SENSOR_TYPE":"TEMPERATURE","SENSOR_READING_VALUE":"99.20502645042536","READING_TIMESTAMP":"03/03/2023 16:00:02"}
+   Produced record 7 on shard shardId-000000000000: {"SITE_ID":"10","SENSOR_TYPE":"PRESSURE","SENSOR_READING_VALUE":"136.0427773999524","READING_TIMESTAMP":"03/03/2023 16:00:02"}
+   Produced record 8 on shard shardId-000000000000: {"SITE_ID":"10","SENSOR_TYPE":"TEMPERATURE","SENSOR_READING_VALUE":"56.877663742741014","READING_TIMESTAMP":"03/03/2023 16:00:02"}
+   Produced record 9 on shard shardId-000000000000: {"SITE_ID":"6","SENSOR_TYPE":"PRESSURE","SENSOR_READING_VALUE":"126.38795749986275","READING_TIMESTAMP":"03/03/2023 16:00:02"}
+   ...
+   ```
+
 

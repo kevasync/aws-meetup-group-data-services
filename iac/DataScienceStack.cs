@@ -79,7 +79,7 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
                 new List<string>(){"SITE_ID", "ALTITUDE"}
             ));
 
-            //Create Ahtena Database (Need to manually create tables)
+            //Create Athena Database (Need to manually create tables)
             var s3AthenaDb = Athena.CreateDatabase($"{Common.appName}_sensor_athena_db", athenaResultBucket.BucketName);
 
             //Create IoT Core things
