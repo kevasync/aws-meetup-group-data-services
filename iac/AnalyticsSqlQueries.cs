@@ -19,14 +19,8 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
    }
 }
 
-
-// SITE_ID string,SENSOR_READING_VALUE string,READING_TIMESTAMP string,ALTITUDE  string
-// SENSOR_READING_VALUE,
-// READING_TIMESTAMP,
-// OUTSIDE_TEMPERATURE
-
-
-// CREATE EXTERNAL TABLE IF NOT EXISTS awsmeetupgroup_dataservicesdemo_sensor_athena_db_0b555a3.pressure (
+//Athena table creation queries:
+// CREATE EXTERNAL TABLE IF NOT EXISTS pressure (
 //   site_id string,
 //   sensor_reading_value string,
 //   reading_timestamp string,
@@ -37,10 +31,9 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
 //   'serialization.format' = '1'
 // ) LOCATION 's3://awsmeetupgroup-dataservicesdemo-pressure-enriched-data-6be57cf/'
 // TBLPROPERTIES ('has_encrypted_data'='false');
-// , 'parquet.compress'='SNAPPY'
 
 
-// CREATE EXTERNAL TABLE IF NOT EXISTS awsmeetupgroup_dataservicesdemo_sensor_athena_db_0b555a3.temperature (
+// CREATE EXTERNAL TABLE IF NOT EXISTS temperature (
 //   `site_id` string,
 //   `sensor_reading_value` string,
 //   `reading_timestamp` string,

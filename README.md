@@ -125,24 +125,61 @@ Setup Redshift Stream Ingestion
    * To test, set `STREAM_NAME` environment variable using `IncomingStreamName` output and run [sample data producer](./kinesis-producer/produce.py)
       * Let run for a few seconds and hit `ctrl-c` to exit
    * Back in the Redshift Query Editor, execute the following to view data from topic:
-      ```sql
-      REFRESH MATERIALIZED VIEW raw_view;
-      select * from raw_view;
-      ```
+         ```sql
+         REFRESH MATERIALIZED VIEW raw_view;
+         select * from raw_view;
+         ```
       ![Raw stream Redshift results](./imgs/raw_stream_redshift_results.png)
    
 Setup Analytics Applications Reference Data
 * _(Optional)_ Ensure you have changed directory to `iac`: `cd iac`
 * Upload reference data
    * Get name of reference data bucket and upload the [altitude.csv](./iac/reference-data/altitude.csv) and [weather.csv](./iac/reference-data/weather.csv) reference data files:
-   ```bash
-   export REFERENCE_BUCKET="$(pulumi stack output --json | jq -r .ReferenceDataBucket)"
-   aws s3 cp reference-data/altitude.csv "s3://${REFERENCE_BUCKET}"
-   aws s3 cp reference-data/weather.csv "s3://${REFERENCE_BUCKET}"
-   ```
+      ```bash
+      export REFERENCE_BUCKET="$(pulumi stack output --json | jq -r .ReferenceDataBucket)"
+      echo "Reference data bucket name: ${REFERENCE_BUCKET}"
+      aws s3 cp reference-data/altitude.csv "s3://${REFERENCE_BUCKET}"
+      aws s3 cp reference-data/weather.csv "s3://${REFERENCE_BUCKET}"
+      ```
 
-Setup Athena Tables
-* Todo
+Setup Athena
+* Set environment variables and create Athena tables:
+   ```bash
+   export ATHENA_DB_NAME="$(pulumi stack output --json | jq -r .AthenaTableName)"
+   export WORKGROUP_NAME=$(aws athena list-work-groups --output json | jq -r '.WorkGroups[0].Name') 
+   export DATA_CATALOG_NAME=$(aws athena list-data-catalogs --output json | jq -r '.DataCatalogsSummary[0].CatalogName') 
+   export ENRICHED_TEMPERATURE_BUCKET_NAME=$(pulumi stack output --json | jq -r .EnrichedTemperatureBucketName)
+   export ENRICHED_PRESSURE_BUCKET_NAME=$(pulumi stack output --json | jq -r .EnrichedPressureBucketName)
+   export ATHENA_RESULTS_BUCKET=$(pulumi stack output --json | jq -r .AthenaResultBucketName)
+
+   echo "Athena database name: ${ATHENA_DB_NAME}"
+   echo "Athena workgroup name: ${WORKGROUP_NAME}"
+   echo "Athena data catalog name: ${DATA_CATALOG_NAME}"
+   echo "Enriched temperature s3 bucket: ${ENRICHED_TEMPERATURE_BUCKET_NAME}" 
+   echo "Enriched pressure s3 bucket: ${ENRICHED_PRESSURE_BUCKET_NAME}" 
+   echo "Athena results s3 bucket: ${ATHENA_RESULTS_BUCKET}" 
+   
+   # One-time step to set Athena output S3 location
+   aws athena update-work-group --work-group "${WORKGROUP_NAME}" --configuration-updates "ResultConfigurationUpdates={OutputLocation=s3://${ATHENA_RESULTS_BUCKET}/}"
+
+   # Create Athena temperature table
+   aws athena start-query-execution \
+    --query-string "CREATE EXTERNAL TABLE IF NOT EXISTS temperature (site_id string,sensor_reading_value string,reading_timestamp string,outside_temperature string) ROW FORMAT SERDE 'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe' WITH SERDEPROPERTIES ('serialization.format' = '1') LOCATION 's3://${ENRICHED_TEMPERATURE_BUCKET_NAME}/' TBLPROPERTIES ('has_encrypted_data'='false');" \
+    --work-group "${WORKGROUP_NAME}" \
+    --query-execution-context "Database=${ATHENA_DB_NAME},Catalog=${DATA_CATALOG_NAME}"
+
+   # Create Athena pressure table
+   aws athena start-query-execution \
+    --query-string "CREATE EXTERNAL TABLE IF NOT EXISTS pressure (site_id string,sensor_reading_value string,reading_timestamp string,altitude string) ROW FORMAT SERDE 'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe' WITH SERDEPROPERTIES ('serialization.format' = '1') LOCATION 's3://${ENRICHED_PRESSURE_BUCKET_NAME}/' TBLPROPERTIES ('has_encrypted_data'='false');" \
+    --work-group "${WORKGROUP_NAME}" \
+    --query-execution-context "Database=${ATHENA_DB_NAME},Catalog=${DATA_CATALOG_NAME}"
+    
+   # ensure tables were created
+   aws athena list-table-metadata --database-name "${ATHENA_DB_NAME}" --catalog-name "${DATA_CATALOG_NAME}" --output json | jq
+
+   ## If you are curious and want to view results from the individual queries, use QueryExecutionId attribute start-execution-query output:
+   # aws athena get-query-results --query-execution-id <your_QueryExecutionId>
+   ```
 
 Produce Data to Raw Sensor Data Topic
 

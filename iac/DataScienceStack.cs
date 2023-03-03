@@ -99,6 +99,8 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
             this.EnrichedTemperatureStreamName = enrichedTemperatureStream.Name;
             this.PressureAnalyticsApplicationName = pressureAnalyticsApp.Name;
             this.TemperatureAnalyticsApplicationName = tempAnalyticsApp.Name;
+            this.AthenaTableName = s3AthenaDb.Name;
+            this.AthenaResultBucketName = athenaResultBucket.BucketName;
         }
 
         [Output]
@@ -127,5 +129,9 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
         public Output<string> PressureAnalyticsApplicationName { get; set; }
         [Output]
         public Output<string> TemperatureAnalyticsApplicationName { get; set; }
+        [Output]
+        public Output<string> AthenaTableName { get; set; }
+        [Output]
+        public Output<string> AthenaResultBucketName { get; set; }
     }
 }
