@@ -110,12 +110,18 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
 
         public static AnalyticsApplication CreateAnalyticsApplication(string name, AnalyticsAppS3EnrichmentArgs args) {
             return new AnalyticsApplication(name, new AnalyticsApplicationArgs {
+                StartApplication = true,
                 Code = args.Code,
                 CloudwatchLoggingOptions = new AnalyticsApplicationCloudwatchLoggingOptionsArgs {
                     LogStreamArn = CloudWatch.CreateLogStream($"{name}-log-stream").Arn,
                     RoleArn = args.RoleArn
                 },
                 Inputs = new AnalyticsApplicationInputsArgs{
+                    StartingPositionConfigurations = new InputList<AnalyticsApplicationInputsStartingPositionConfigurationArgs>{
+                        new AnalyticsApplicationInputsStartingPositionConfigurationArgs {
+                            StartingPosition = "TRIM_HORIZON"
+                        }
+                    },
                     KinesisStream = new AnalyticsApplicationInputsKinesisStreamArgs {
                         ResourceArn = args.StreamArn,
                         RoleArn = args.RoleArn

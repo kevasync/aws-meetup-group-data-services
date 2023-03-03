@@ -32,6 +32,7 @@ Usage example of some commonly used AWS data services:
 ## Getting Started
 Prerequisites:
  * Active AWS account w/ [CLI access configured](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html)
+ * [jq](https://stedolan.github.io/jq/download/)
  * Active Pulumi account (Can be created using GitHub as login provider)
  * [Pulumi CLI](https://www.pulumi.com/docs/get-started/install/)
  * [.NET Core](https://dotnet.microsoft.com/en-us/download/dotnet/3.1)
@@ -130,8 +131,18 @@ Setup Redshift Stream Ingestion
       ```
       ![Raw stream Redshift results](./imgs/raw_stream_redshift_results.png)
    
-Setup Analytics Applications
-* Todo
+Setup Analytics Applications Reference Data
+* _(Optional)_ Ensure you have changed directory to `iac`: `cd iac`
+* Upload reference data
+   * Get name of reference data bucket and upload the [altitude.csv](./iac/reference-data/altitude.csv) and [weather.csv](./iac/reference-data/weather.csv) reference data files:
+   ```bash
+   export REFERENCE_BUCKET="$(pulumi stack output --json | jq -r .ReferenceDataBucket)"
+   aws s3 cp reference-data/altitude.csv "s3://${REFERENCE_BUCKET}"
+   aws s3 cp reference-data/weather.csv "s3://${REFERENCE_BUCKET}"
+   ```
 
 Setup Athena Tables
 * Todo
+
+Produce Data to Raw Sensor Data Topic
+

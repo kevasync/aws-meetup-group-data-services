@@ -97,6 +97,8 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
             this.IoTPublicKey = iotCert.PublicKey;
             this.EnrichedPressureStreamName = enrichedPressureStream.Name;
             this.EnrichedTemperatureStreamName = enrichedTemperatureStream.Name;
+            this.PressureAnalyticsApplicationName = pressureAnalyticsApp.Name;
+            this.TemperatureAnalyticsApplicationName = tempAnalyticsApp.Name;
         }
 
         [Output]
@@ -121,5 +123,9 @@ namespace AwsMeetupGroup.DataServices.Infrastructure {
         public Output<string> EnrichedPressureStreamName { get; set; }
         [Output]
         public Output<string> EnrichedTemperatureStreamName { get; set; }
+        [Output]
+        public Output<string> PressureAnalyticsApplicationName { get; set; }
+        [Output]
+        public Output<string> TemperatureAnalyticsApplicationName { get; set; }
     }
 }
